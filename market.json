@@ -1,0 +1,46 @@
+{
+  "products": [
+    {
+      "id": 1,
+      "name": "Smartphone Samsung Galaxy",
+      "price": 599.99,
+      "image": "https://via.placeholder.com/200x200/007BFF/FFFFFF?text=Samsung",
+      "description": "Smartphone di ultima generazione con fotocamera avanzata"
+    },
+    {
+      "id": 2,
+      "name": "Laptop Dell XPS",
+      "price": 1299.99,
+      "image": "https://via.placeholder.com/200x200/28A745/FFFFFF?text=Dell",
+      "description": "Laptop professionale con processore Intel i7"
+    },
+    {
+      "id": 3,
+      "name": "Auricolari Wireless",
+      "price": 79.99,
+      "image": "https://via.placeholder.com/200x200/FFC107/FFFFFF?text=Auricolari",
+      "description": "Auricolari wireless con cancellazione del rumore"
+    },
+    {
+      "id": 4,
+      "name": "Tablet iPad Air",
+      "price": 649.99,
+      "image": "https://via.placeholder.com/200x200/DC3545/FFFFFF?text=iPad",
+      "description": "Tablet leggero e potente per lavoro e intrattenimento"
+    },
+    {
+      "id": 5,
+      "name": "Smartwatch Apple",
+      "price": 399.99,
+      "image": "https://via.placeholder.com/200x200/6C757D/FFFFFF?text=Watch",
+      "description": "Smartwatch con monitoraggio della salute"
+    },
+    {
+      "id": 6,
+      "name": "Speaker Bluetooth",
+      "price": 129.99,
+      "image": "https://via.placeholder.com/200x200/17A2B8/FFFFFF?text=Speaker",
+      "description": "Speaker portatile con audio di alta qualità"
+    }
+  ]
+}

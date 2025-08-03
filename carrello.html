@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MTA Social Hub - Carrello</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+</head>
+<body>
+    <div id="app">
+        <!-- Header -->
+        <header class="header">
+            <div class="container">
+                <h1 class="logo">🛍️ MTA Social Hub</h1>
+                <nav class="nav">
+                    <button @click="showProducts" :class="{ active: currentPage === 'products' }" class="nav-btn">
+                        Prodotti
+                    </button>
+                    <button @click="showCart" :class="{ active: currentPage === 'cart' }" class="nav-btn">
+                        Carrello <span class="cart-count" v-if="cartItems.length > 0">({{ cartItems.length }})</span>
+                    </button>
+                </nav>
+            </div>
+        </header>
+
+        <!-- Pagina Prodotti -->
+        <main v-if="currentPage === 'products'" class="products-page">
+            <div class="container">
+                <h2>I Nostri Prodotti</h2>
+                <div class="products-grid">
+                    <div v-for="product in products" :key="product.id" class="product-card">
+                        <img :src="product.image" :alt="product.name" class="product-image">
+                        <div class="product-info">
+                            <h3 class="product-name">{{ product.name }}</h3>
+                            <p class="product-description">{{ product.description }}</p>
+                            <div class="product-footer">
+                                <span class="product-price">€{{ product.price.toFixed(2) }}</span>
+                                <button @click="addToCart(product)" class="add-to-cart-btn">
+                                    Aggiungi al Carrello
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Pagina Carrello -->
+        <main v-if="currentPage === 'cart'" class="cart-page">
+            <div class="container">
+                <h2>Il Tuo Carrello</h2>
+                <div v-if="cartItems.length === 0" class="empty-cart">
+                    <p>Il tuo carrello è vuoto</p>
+                    <button @click="showProducts" class="continue-shopping-btn">
+                        Continua gli Acquisti
+                    </button>
+                </div>
+                <div v-else class="cart-content">
+                    <div class="cart-items">
+                        <div v-for="item in cartItems" :key="item.id" class="cart-item">
+                            <img :src="item.image" :alt="item.name" class="cart-item-image">
+                            <div class="cart-item-info">
+                                <h3 class="cart-item-name">{{ item.name }}</h3>
+                                <p class="cart-item-description">{{ item.description }}</p>
+                            </div>
+                            <div class="cart-item-controls">
+                                <div class="quantity-controls">
+                                    <button @click="decreaseQuantity(item)" class="qty-btn">-</button>
+                                    <span class="quantity">{{ item.quantity }}</span>
+                                    <button @click="increaseQuantity(item)" class="qty-btn">+</button>
+                                </div>
+                                <span class="cart-item-price">€{{ (item.price * item.quantity).toFixed(2) }}</span>
+                                <button @click="removeFromCart(item)" class="remove-btn">🗑️</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="cart-summary">
+                        <div class="total">
+                            <strong>Totale: €{{ cartTotal.toFixed(2) }}</strong>
+                        </div>
+                        <button @click="checkout" class="checkout-btn">
+                            Procedi al Checkout
+                        </button>
+                        <button @click="showProducts" class="continue-shopping-btn">
+                            Continua gli Acquisti
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Modal Checkout -->
+        <div v-if="showCheckoutModal" class="modal-overlay" @click="closeCheckout">
+            <div class="modal-content" @click.stop>
+                <div class="modal-header">
+                    <h3>Completa il tuo ordine</h3>
+                    <button @click="closeCheckout" class="close-btn">×</button>
+                </div>
+                <div class="modal-body">
+                    <div class="order-summary">
+                        <h4>Riepilogo Ordine</h4>
+                        <div class="order-items">
+                            <div v-for="item in cartItems" :key="item.id" class="order-item">
+                                <span>{{ item.name }} x{{ item.quantity }}</span>
+                                <span>€{{ (item.price * item.quantity).toFixed(2) }}</span>
+                            </div>
+                        </div>
+                        <div class="order-total">
+                            <strong>Totale: €{{ cartTotal.toFixed(2) }}</strong>
+                        </div>
+                    </div>
+                    
+                    <form @submit.prevent="processPayment" class="payment-form">
+                        <div class="form-section">
+                            <h4>Dati di Spedizione</h4>
+                            <div class="form-row">
+                                <input v-model="shippingData.name" type="text" placeholder="Nome e Cognome" required>
+                            </div>
+                            <div class="form-row">
+                                <input v-model="shippingData.address" type="text" placeholder="Indirizzo" required>
+                            </div>
+                            <div class="form-row">
+                                <input v-model="shippingData.city" type="text" placeholder="Città" required>
+                                <input v-model="shippingData.zip" type="text" placeholder="CAP" required>
+                            </div>
+                        </div>
+
+                        <div class="form-section">
+                            <h4>Metodo di Pagamento</h4>
+                            <div class="payment-methods">
+                                <label class="payment-option">
+                                    <input v-model="paymentMethod" type="radio" value="card" required>
+                                    <span class="payment-label">💳 Carta di Credito/Debito</span>
+                                </label>
+                                <label class="payment-option">
+                                    <input v-model="paymentMethod" type="radio" value="paypal" required>
+                                    <span class="payment-label">🅿️ PayPal</span>
+                                </label>
+                                <label class="payment-option">
+                                    <input v-model="paymentMethod" type="radio" value="cash" required>
+                                    <span class="payment-label">� Contanti</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div v-if="paymentMethod === 'card'" class="form-section">
+                            <h4>Dati Carta</h4>
+                            <div class="form-row">
+                                <input v-model="cardData.number" type="text" placeholder="Numero Carta" maxlength="19" required>
+                            </div>
+                            <div class="form-row">
+                                <input v-model="cardData.expiry" type="text" placeholder="MM/AA" maxlength="5" required>
+                                <input v-model="cardData.cvv" type="text" placeholder="CVV" maxlength="3" required>
+                            </div>
+                            <div class="form-row">
+                                <input v-model="cardData.name" type="text" placeholder="Nome sulla Carta" required>
+                            </div>
+                        </div>
+
+                        <div class="modal-actions">
+                            <button type="button" @click="closeCheckout" class="cancel-btn">Annulla</button>
+                            <button type="submit" class="confirm-payment-btn">
+                                Conferma Ordine - €{{ cartTotal.toFixed(2) }}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notifiche -->
+        <div v-if="notification" class="notification" :class="notification.type">
+            {{ notification.message }}
+        </div>
+    </div>
+
+    <script>
+        const { createApp } = Vue;
+
+        createApp({
+            data() {
+                return {
+                    currentPage: 'cart', // Inizia direttamente nella pagina carrello
+                    products: [],
+                    cartItems: [],
+                    notification: null,
+                    showCheckoutModal: false,
+                    paymentMethod: '',
+                    shippingData: {
+                        name: '',
+                        address: '',
+                        city: '',
+                        zip: ''
+                    },
+                    cardData: {
+                        number: '',
+                        expiry: '',
+                        cvv: '',
+                        name: ''
+                    }
+                }
+            },
+            computed: {
+                cartTotal() {
+                    return this.cartItems.reduce((total, item) => total + (item.price * item.quantity), 0);
+                }
+            },
+            methods: {
+                loadProducts() {
+                    // Dati prodotti integrati direttamente nel codice (nessun server necessario)
+                    this.products = [
+                        {
+                            id: 1,
+                            name: "Smartphone Samsung Galaxy",
+                            price: 599.99,
+                            image: "https://via.placeholder.com/200x200/007BFF/FFFFFF?text=Samsung",
+                            description: "Smartphone di ultima generazione con fotocamera avanzata"
+                        },
+                        {
+                            id: 2,
+                            name: "Laptop Dell XPS",
+                            price: 1299.99,
+                            image: "https://via.placeholder.com/200x200/28A745/FFFFFF?text=Dell",
+                            description: "Laptop professionale con processore Intel i7"
+                        },
+                        {
+                            id: 3,
+                            name: "Auricolari Wireless",
+                            price: 79.99,
+                            image: "https://via.placeholder.com/200x200/FFC107/FFFFFF?text=Auricolari",
+                            description: "Auricolari wireless con cancellazione del rumore"
+                        },
+                        {
+                            id: 4,
+                            name: "Tablet iPad Air",
+                            price: 649.99,
+                            image: "https://via.placeholder.com/200x200/DC3545/FFFFFF?text=iPad",
+                            description: "Tablet leggero e potente per lavoro e intrattenimento"
+                        },
+                        {
+                            id: 5,
+                            name: "Smartwatch Apple",
+                            price: 399.99,
+                            image: "https://via.placeholder.com/200x200/6C757D/FFFFFF?text=Watch",
+                            description: "Smartwatch con monitoraggio della salute"
+                        },
+                        {
+                            id: 6,
+                            name: "Speaker Bluetooth",
+                            price: 129.99,
+                            image: "https://via.placeholder.com/200x200/17A2B8/FFFFFF?text=Speaker",
+                            description: "Speaker portatile con audio di alta qualità"
+                        }
+                    ];
+                },
+                showProducts() {
+                    this.currentPage = 'products';
+                    this.updateURL('index');
+                },
+                showCart() {
+                    this.currentPage = 'cart';
+                    this.updateURL('carrello');
+                },
+                updateURL(page) {
+                    // Simula il cambio di URL senza ricaricare la pagina (come AJAX)
+                    window.history.pushState({}, '', `${page}.html`);
+                },
+                addToCart(product) {
+                    const existingItem = this.cartItems.find(item => item.id === product.id);
+                    if (existingItem) {
+                        existingItem.quantity++;
+                    } else {
+                        this.cartItems.push({
+                            ...product,
+                            quantity: 1
+                        });
+                    }
+                    this.saveCart();
+                    this.showNotification(`${product.name} aggiunto al carrello!`, 'success');
+                },
+                removeFromCart(item) {
+                    const index = this.cartItems.findIndex(cartItem => cartItem.id === item.id);
+                    if (index !== -1) {
+                        this.cartItems.splice(index, 1);
+                        this.saveCart();
+                        this.showNotification(`${item.name} rimosso dal carrello`, 'info');
+                    }
+                },
+                increaseQuantity(item) {
+                    item.quantity++;
+                    this.saveCart();
+                },
+                decreaseQuantity(item) {
+                    if (item.quantity > 1) {
+                        item.quantity--;
+                        this.saveCart();
+                    } else {
+                        this.removeFromCart(item);
+                    }
+                },
+                saveCart() {
+                    localStorage.setItem('mtaCart', JSON.stringify(this.cartItems));
+                },
+                loadCart() {
+                    const savedCart = localStorage.getItem('mtaCart');
+                    if (savedCart) {
+                        this.cartItems = JSON.parse(savedCart);
+                    }
+                },
+                showNotification(message, type = 'info') {
+                    this.notification = { message, type };
+                    setTimeout(() => {
+                        this.notification = null;
+                    }, 3000);
+                },
+                checkout() {
+                    this.showCheckoutModal = true;
+                },
+                closeCheckout() {
+                    this.showCheckoutModal = false;
+                    this.resetCheckoutData();
+                },
+                processPayment() {
+                    // Simula il processo di pagamento
+                    this.showNotification('Elaborazione pagamento...', 'info');
+                    
+                    setTimeout(() => {
+                        const orderNumber = Math.floor(Math.random() * 1000000);
+                        this.showNotification(`Ordine #${orderNumber} confermato! Grazie per il tuo acquisto!`, 'success');
+                        
+                        // Reset carrello e chiudi modal
+                        this.cartItems = [];
+                        this.saveCart();
+                        this.closeCheckout();
+                        this.showProducts();
+                    }, 2000);
+                },
+                resetCheckoutData() {
+                    this.paymentMethod = '';
+                    this.shippingData = {
+                        name: '',
+                        address: '',
+                        city: '',
+                        zip: ''
+                    };
+                    this.cardData = {
+                        number: '',
+                        expiry: '',
+                        cvv: '',
+                        name: ''
+                    };
+                },
+                initializePage() {
+                    // Determina la pagina corrente dal URL
+                    const currentURL = window.location.pathname;
+                    if (currentURL.includes('carrello')) {
+                        this.currentPage = 'cart';
+                    } else {
+                        this.currentPage = 'products';
+                    }
+                }
+            },
+            mounted() {
+                this.loadProducts();
+                this.loadCart();
+                this.initializePage();
+                
+                // Gestisce il pulsante indietro del browser
+                window.addEventListener('popstate', () => {
+                    this.initializePage();
+                });
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>
