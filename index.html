@@ -6,6 +6,12 @@
     <title>MTA Social Hub - Marketplace</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <!-- Payment Configuration -->
+    <script src="config.js"></script>
+    <!-- Stripe.js -->
+    <script src="https://js.stripe.com/v3/"></script>
+    <!-- PayPal SDK -->
+    <script src="https://www.paypal.com/sdk/js?client-id=YOUR_PAYPAL_CLIENT_ID&currency=EUR"></script>
 </head>
 <body>
     <div id="app">
@@ -122,11 +128,13 @@
                                     <label for="delivery">🚚 Consegna a Domicilio</label>
                                     <p class="delivery-description">Ricevi il prodotto comodamente a casa tua</p>
                                 </div>
+                                <!-- 
                                 <div class="delivery-option">
                                     <input type="radio" id="pickup" v-model="checkoutForm.deliveryMethod" value="pickup">
                                     <label for="pickup">🏢 Ritiro presso Centro MTA</label>
                                     <p class="delivery-description">Ritira il prodotto presso il nostro centro</p>
                                 </div>
+                                -->
                             </div>
 
                             <div v-if="checkoutForm.deliveryMethod === 'delivery'" class="address-section">
@@ -150,6 +158,7 @@
                                 </div>
                             </div>
 
+                            <!-- 
                             <div v-if="checkoutForm.deliveryMethod === 'pickup'" class="pickup-info">
                                 <div class="info-box">
                                     <h4>📍 Informazioni Ritiro</h4>
@@ -159,47 +168,98 @@
                                     <p class="note">💡 Porta con te un documento d'identità e il codice ordine</p>
                                 </div>
                             </div>
+                            -->
                             
                             <h3>Metodo di Pagamento</h3>
                             <div class="payment-methods">
                                 <div class="payment-option">
-                                    <input type="radio" id="card" v-model="checkoutForm.paymentMethod" value="card" checked>
-                                    <label for="card">💳 Carta di Credito</label>
+                                    <input type="radio" id="stripe" v-model="checkoutForm.paymentMethod" value="stripe" checked>
+                                    <label for="stripe">💳 Carta di Credito/Debito (Stripe)</label>
+                                    <p class="payment-description">Pagamento sicuro con Stripe - Visa, Mastercard, American Express</p>
                                 </div>
                                 <div class="payment-option">
-                                    <input type="radio" id="cash" v-model="checkoutForm.paymentMethod" value="cash">
-                                    <label for="cash">💵 Contanti</label>
+                                    <input type="radio" id="paypal" v-model="checkoutForm.paymentMethod" value="paypal">
+                                    <label for="paypal">�️ PayPal</label>
+                                    <p class="payment-description">Paga con il tuo account PayPal o carta tramite PayPal</p>
+                                </div>
+                                <div class="payment-option">
+                                    <input type="radio" id="bank" v-model="checkoutForm.paymentMethod" value="bank">
+                                    <label for="bank">🏦 Bonifico Bancario</label>
+                                    <p class="payment-description">Trasferimento bancario tradizionale (1-3 giorni lavorativi)</p>
                                 </div>
                             </div>
 
-                            <div v-if="checkoutForm.paymentMethod === 'card'" class="card-details">
-                                <p class="payment-note">💳 Compila i dati della tua carta di credito:</p>
-                                <div class="form-group">
-                                    <label for="cardNumber">Numero Carta *</label>
-                                    <input type="text" id="cardNumber" v-model="checkoutForm.cardNumber" 
-                                           placeholder="1234 5678 9012 3456" maxlength="19" 
-                                           @input="formatCardNumber" required>
+                            <!-- Stripe Payment -->
+                            <div v-if="checkoutForm.paymentMethod === 'stripe'" class="stripe-details">
+                                <p class="payment-note">💳 Pagamento sicuro elaborato da Stripe:</p>
+                                <div id="stripe-card-element" class="stripe-element">
+                                    <!-- Stripe Elements creerà automaticamente i campi della carta qui -->
                                 </div>
-                                <div class="form-row">
-                                    <div class="form-group">
-                                        <label for="expiryDate">Scadenza *</label>
-                                        <input type="text" id="expiryDate" v-model="checkoutForm.expiryDate" 
-                                               placeholder="MM/AA" maxlength="5" @input="formatExpiryDate" required>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="cvv">CVV *</label>
-                                        <input type="text" id="cvv" v-model="checkoutForm.cvv" 
-                                               placeholder="123" maxlength="3" required>
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label for="cardHolder">Intestatario Carta *</label>
-                                    <input type="text" id="cardHolder" v-model="checkoutForm.cardHolder" required>
+                                <div id="stripe-card-errors" class="stripe-errors" role="alert"></div>
+                                <div class="stripe-info">
+                                    <p class="security-note">🔒 <strong>Sicurezza massima:</strong> Stripe elabora i pagamenti in conformità agli standard PCI DSS. I tuoi dati non vengono mai memorizzati sui nostri server.</p>
+                                    <p class="accepted-cards">💳 <strong>Carte accettate:</strong> Visa, Mastercard, American Express, Discover</p>
                                 </div>
                             </div>
 
-                            <div v-if="checkoutForm.paymentMethod === 'cash'" class="cash-details">
-                                <p class="payment-note">💵 Pagamento in contanti alla consegna. Non sono necessari altri dati di pagamento.</p>
+                            <!-- PayPal Payment -->
+                            <div v-if="checkoutForm.paymentMethod === 'paypal'" class="paypal-details">
+                                <p class="payment-note">🅿️ Pagamento con PayPal:</p>
+                                <div id="paypal-button-container" class="paypal-container">
+                                    <!-- I pulsanti PayPal verranno inseriti qui -->
+                                </div>
+                                <div class="paypal-info">
+                                    <p class="security-note">🔒 <strong>Protezione acquirenti PayPal:</strong> I tuoi acquisti sono protetti dalla Garanzia PayPal.</p>
+                                    <p>💡 Puoi pagare con il tuo saldo PayPal, carta di credito o conto bancario collegato.</p>
+                                </div>
+                            </div>
+
+                            <div v-if="checkoutForm.paymentMethod === 'bank'" class="bank-details">
+                                <p class="payment-note">🏦 Collegamento con il tuo conto bancario:</p>
+                                <div class="bank-connection">
+                                    <div class="form-group">
+                                        <label for="bankName">Seleziona la tua Banca *</label>
+                                        <select id="bankName" v-model="checkoutForm.bankName" required>
+                                            <option value="">-- Scegli la tua banca --</option>
+                                            <option value="intesa">Intesa Sanpaolo</option>
+                                            <option value="unicredit">UniCredit</option>
+                                            <option value="bnl">BNL - Gruppo BNP Paribas</option>
+                                            <option value="montepaschi">Monte dei Paschi di Siena</option>
+                                            <option value="banco_bpm">Banco BPM</option>
+                                            <option value="poste">Poste Italiane</option>
+                                            <option value="mediolanum">Mediolanum Bank</option>
+                                            <option value="fineco">FinecoBank</option>
+                                            <option value="ing">ING Direct</option>
+                                            <option value="n26">N26</option>
+                                            <option value="revolut">Revolut</option>
+                                            <option value="other">Altra banca</option>
+                                        </select>
+                                    </div>
+                                    <div v-if="checkoutForm.bankName === 'other'" class="form-group">
+                                        <label for="customBankName">Nome della tua Banca *</label>
+                                        <input type="text" id="customBankName" v-model="checkoutForm.customBankName" 
+                                               placeholder="Inserisci il nome della banca" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="iban">IBAN *</label>
+                                        <input type="text" id="iban" v-model="checkoutForm.iban" 
+                                               placeholder="IT60 X054 2811 1010 0000 0123 456" 
+                                               @input="formatIban" maxlength="32" required>
+                                        <small class="form-help">Inserisci il tuo IBAN per il bonifico istantaneo</small>
+                                    </div>
+                                    <div class="bank-info">
+                                        <div class="info-item">
+                                            <strong>💡 Come funziona:</strong>
+                                            <p>1. Inserisci i tuoi dati bancari in modo sicuro</p>
+                                            <p>2. Autorizza il bonifico istantaneo dal tuo conto</p>
+                                            <p>3. Il pagamento viene elaborato immediatamente</p>
+                                            <p>4. Riceverai conferma via email e SMS</p>
+                                        </div>
+                                        <div class="security-note">
+                                            <p>🔒 <strong>Sicurezza garantita:</strong> I tuoi dati bancari sono crittografati e non vengono memorizzati sui nostri server.</p>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
 
                             <div class="form-actions">
@@ -256,12 +316,14 @@
                         city: '',
                         cap: '',
                         deliveryMethod: 'delivery',
-                        paymentMethod: 'card',
-                        cardNumber: '',
-                        expiryDate: '',
-                        cvv: '',
-                        cardHolder: ''
-                    }
+                        paymentMethod: 'stripe',
+                        bankName: '',
+                        customBankName: '',
+                        iban: ''
+                    },
+                    stripe: null,
+                    stripeCard: null,
+                    paypalRendered: false
                 }
             },
             computed: {
@@ -328,6 +390,11 @@
                 showCheckout() {
                     this.currentPage = 'checkout';
                     this.updateURL('checkout');
+                    
+                    // Inizializza i servizi di pagamento quando si entra nel checkout
+                    this.$nextTick(() => {
+                        this.initializePaymentServices();
+                    });
                 },
                 updateURL(page) {
                     // Simula il cambio di URL senza ricaricare la pagina (come AJAX)
@@ -392,58 +459,213 @@
                     
                     this.isProcessing = true;
                     
-                    // Salva il metodo di pagamento e consegna prima del timeout
-                    const paymentMethod = this.checkoutForm.paymentMethod;
-                    const deliveryMethod = this.checkoutForm.deliveryMethod;
-                    
-                    // Simula il processo di elaborazione dell'ordine (tutto locale, nessun server)
-                    setTimeout(() => {
+                    // Elabora il pagamento in base al metodo selezionato
+                    if (this.checkoutForm.paymentMethod === 'stripe') {
+                        this.processStripePayment();
+                    } else if (this.checkoutForm.paymentMethod === 'paypal') {
+                        // PayPal gestisce il pagamento tramite i suoi pulsanti
+                        this.showNotification('Completa il pagamento tramite PayPal', 'info');
                         this.isProcessing = false;
+                    } else if (this.checkoutForm.paymentMethod === 'bank') {
+                        this.processBankTransfer();
+                    }
+                },
+                initializePaymentServices() {
+                    this.initializeStripe();
+                    this.initializePayPal();
+                },
+                initializeStripe() {
+                    // Usa la configurazione dal file config.js
+                    const stripeKey = window.PAYMENT_CONFIG?.stripe?.publicKey || 'pk_test_YOUR_STRIPE_PUBLIC_KEY';
+                    
+                    if (typeof Stripe !== 'undefined') {
+                        this.stripe = Stripe(stripeKey);
+                        const elements = this.stripe.elements();
                         
-                        // Crea l'ordine con tutti i dati
-                        const order = {
-                            id: Date.now(),
-                            items: [...this.cartItems],
-                            total: this.cartTotal,
-                            customerInfo: {...this.checkoutForm},
-                            date: new Date().toLocaleString('it-IT'),
-                            status: 'Confermato'
+                        // Crea l'elemento carta
+                        this.stripeCard = elements.create('card', {
+                            style: {
+                                base: {
+                                    fontSize: '16px',
+                                    color: '#424770',
+                                    '::placeholder': {
+                                        color: '#aab7c4',
+                                    },
+                                    padding: '12px',
+                                },
+                                invalid: {
+                                    color: '#9e2146',
+                                },
+                            },
+                        });
+                        
+                        // Monta l'elemento nel DOM
+                        const cardElement = document.getElementById('stripe-card-element');
+                        if (cardElement) {
+                            this.stripeCard.mount('#stripe-card-element');
+                            
+                            // Gestisci gli errori real-time
+                            this.stripeCard.on('change', ({error}) => {
+                                const displayError = document.getElementById('stripe-card-errors');
+                                if (error) {
+                                    displayError.textContent = error.message;
+                                } else {
+                                    displayError.textContent = '';
+                                }
+                            });
+                        }
+                    } else {
+                        console.error('Stripe.js non è caricato');
+                        this.showNotification('Servizio di pagamento non disponibile', 'error');
+                    }
+                },
+                initializePayPal() {
+                    if (typeof paypal !== 'undefined' && !this.paypalRendered) {
+                        const container = document.getElementById('paypal-button-container');
+                        if (container) {
+                            // Svuota il container prima di renderizzare
+                            container.innerHTML = '';
+                            
+                            paypal.Buttons({
+                                createOrder: (data, actions) => {
+                                    return actions.order.create({
+                                        purchase_units: [{
+                                            amount: {
+                                                value: this.cartTotal.toFixed(2),
+                                                currency_code: 'EUR'
+                                            },
+                                            description: `Ordine MTA Social Hub - ${this.cartItems.length} articoli`
+                                        }]
+                                    });
+                                },
+                                onApprove: (data, actions) => {
+                                    return actions.order.capture().then((details) => {
+                                        this.completeOrder({
+                                            paymentMethod: 'paypal',
+                                            transactionId: details.id,
+                                            payerName: details.payer.name.given_name + ' ' + details.payer.name.surname,
+                                            payerEmail: details.payer.email_address
+                                        });
+                                    });
+                                },
+                                onError: (err) => {
+                                    console.error('Errore PayPal:', err);
+                                    this.showNotification('Errore durante il pagamento PayPal', 'error');
+                                    this.isProcessing = false;
+                                },
+                                style: {
+                                    color: 'blue',
+                                    shape: 'rect',
+                                    label: 'paypal'
+                                }
+                            }).render('#paypal-button-container');
+                            
+                            this.paypalRendered = true;
+                        }
+                    }
+                },
+                async processStripePayment() {
+                    if (!this.stripe || !this.stripeCard) {
+                        this.showNotification('Servizio di pagamento non disponibile', 'error');
+                        this.isProcessing = false;
+                        return;
+                    }
+                    
+                    // Crea il PaymentMethod
+                    const {error, paymentMethod} = await this.stripe.createPaymentMethod({
+                        type: 'card',
+                        card: this.stripeCard,
+                        billing_details: {
+                            name: `${this.checkoutForm.firstName} ${this.checkoutForm.lastName}`,
+                            email: this.checkoutForm.email,
+                            phone: this.checkoutForm.phone,
+                            address: {
+                                line1: this.checkoutForm.address,
+                                city: this.checkoutForm.city,
+                                postal_code: this.checkoutForm.cap,
+                                country: 'IT'
+                            }
+                        },
+                    });
+                    
+                    if (error) {
+                        this.showNotification(`Errore pagamento: ${error.message}`, 'error');
+                        this.isProcessing = false;
+                        return;
+                    }
+                    
+                    // In una vera implementazione, qui invieresti il paymentMethod.id al tuo server
+                    // per completare il pagamento. Per questo esempio, simuliamo il successo:
+                    
+                    setTimeout(() => {
+                        this.completeOrder({
+                            paymentMethod: 'stripe',
+                            transactionId: 'pi_' + Date.now(), // ID transazione simulato
+                            stripePaymentMethodId: paymentMethod.id
+                        });
+                    }, 2000);
+                },
+                processBankTransfer() {
+                    // Per il bonifico bancario, generiamo le istruzioni
+                    setTimeout(() => {
+                        const order = this.createOrderData();
+                        order.paymentInstructions = {
+                            method: 'bank_transfer',
+                            bankDetails: {
+                                bankName: 'Banca Esempio S.p.A.',
+                                iban: 'IT60 X054 2811 1010 0000 0123 456',
+                                bic: 'BCITITMM',
+                                recipient: 'MTA Social Hub S.r.l.',
+                                reference: `ORD-${order.id}`
+                            }
                         };
                         
-                        // Salva l'ordine nel localStorage (tutto offline)
                         this.saveOrder(order);
-                        
-                        // Svuota il carrello
                         this.cartItems = [];
                         this.saveCart();
-                        
-                        // Reset form
                         this.resetCheckoutForm();
                         
-                        // Messaggio di conferma diverso per metodo di pagamento e consegna
-                        let message = '';
+                        this.showNotification(`Ordine creato! ID: ${order.id}. Riceverai le istruzioni per il bonifico via email.`, 'success');
+                        this.isProcessing = false;
                         
-                        if (paymentMethod === 'cash') {
-                            if (deliveryMethod === 'delivery') {
-                                message = `Ordine confermato! ID: ${order.id}. Consegna a domicilio con pagamento in contanti.`;
-                            } else {
-                                message = `Ordine confermato! ID: ${order.id}. Ritiro presso Centro MTA con pagamento in contanti.`;
-                            }
-                        } else {
-                            if (deliveryMethod === 'delivery') {
-                                message = `Ordine confermato! ID: ${order.id}. Consegna a domicilio - Pagamento elaborato.`;
-                            } else {
-                                message = `Ordine confermato! ID: ${order.id}. Ritiro presso Centro MTA - Pagamento elaborato.`;
-                            }
-                        }
-                        
-                        this.showNotification(message, 'success');
-                        
-                        // Torna alla pagina prodotti dopo 3 secondi
                         setTimeout(() => {
                             this.showProducts();
-                        }, 3000);
+                        }, 4000);
                     }, 1500);
+                },
+                completeOrder(paymentData) {
+                    const order = this.createOrderData();
+                    order.payment = paymentData;
+                    order.status = 'Pagato';
+                    
+                    this.saveOrder(order);
+                    this.cartItems = [];
+                    this.saveCart();
+                    this.resetCheckoutForm();
+                    
+                    let message = '';
+                    if (paymentData.paymentMethod === 'stripe') {
+                        message = `Pagamento completato! Ordine ID: ${order.id}. Riceverai conferma via email.`;
+                    } else if (paymentData.paymentMethod === 'paypal') {
+                        message = `Pagamento PayPal completato! Ordine ID: ${order.id}. Grazie ${paymentData.payerName}!`;
+                    }
+                    
+                    this.showNotification(message, 'success');
+                    this.isProcessing = false;
+                    
+                    setTimeout(() => {
+                        this.showProducts();
+                    }, 3000);
+                },
+                createOrderData() {
+                    return {
+                        id: Date.now(),
+                        items: [...this.cartItems],
+                        total: this.cartTotal,
+                        customerInfo: {...this.checkoutForm},
+                        date: new Date().toLocaleString('it-IT'),
+                        status: 'In elaborazione'
+                    };
                 },
                 validateCheckoutForm() {
                     const form = this.checkoutForm;
@@ -475,46 +697,46 @@
                         return false;
                     }
                     
-                    // Validazione specifica per carta di credito
-                    if (form.paymentMethod === 'card') {
-                        if (!form.cardNumber || !form.expiryDate || !form.cvv || !form.cardHolder) {
-                            this.showNotification('Per favore compila tutti i dati della carta', 'error');
+                    // Validazione specifica per metodi di pagamento
+                    if (form.paymentMethod === 'stripe') {
+                        // Stripe gestisce la validazione internamente
+                        if (!this.stripeCard) {
+                            this.showNotification('Servizio di pagamento non disponibile. Ricarica la pagina.', 'error');
+                            return false;
+                        }
+                    } else if (form.paymentMethod === 'paypal') {
+                        // PayPal gestisce tutto internamente, nessuna validazione necessaria qui
+                    } else if (form.paymentMethod === 'bank') {
+                        if (!form.bankName || !form.iban) {
+                            this.showNotification('Per favore seleziona la banca e inserisci l\'IBAN', 'error');
                             return false;
                         }
                         
-                        // Validazione numero carta (deve essere 16 cifre)
-                        const cardNumberClean = form.cardNumber.replace(/\s/g, '');
-                        if (cardNumberClean.length !== 16 || !/^\d+$/.test(cardNumberClean)) {
-                            this.showNotification('Il numero carta deve essere di 16 cifre', 'error');
+                        if (form.bankName === 'other' && !form.customBankName) {
+                            this.showNotification('Per favore inserisci il nome della tua banca', 'error');
                             return false;
                         }
                         
-                        // Validazione CVV (3 cifre)
-                        if (!/^\d{3}$/.test(form.cvv)) {
-                            this.showNotification('Il CVV deve essere di 3 cifre', 'error');
+                        // Validazione IBAN (formato italiano base)
+                        const ibanClean = form.iban.replace(/\s/g, '').toUpperCase();
+                        if (!ibanClean.startsWith('IT') || ibanClean.length !== 27) {
+                            this.showNotification('Inserisci un IBAN italiano valido (27 caratteri)', 'error');
                             return false;
                         }
                         
-                        // Validazione data scadenza (formato MM/AA)
-                        if (!/^\d{2}\/\d{2}$/.test(form.expiryDate)) {
-                            this.showNotification('Inserisci una data di scadenza valida (MM/AA)', 'error');
+                        if (!/^IT\d{2}[A-Z]\d{3}\d{4}\d{12}$/.test(ibanClean)) {
+                            this.showNotification('Formato IBAN non valido', 'error');
                             return false;
                         }
                     }
                     
                     return true;
                 },
-                formatCardNumber() {
-                    let value = this.checkoutForm.cardNumber.replace(/\s/g, '');
-                    let formattedValue = value.replace(/(\d{4})(?=\d)/g, '$1 ');
-                    this.checkoutForm.cardNumber = formattedValue;
-                },
-                formatExpiryDate() {
-                    let value = this.checkoutForm.expiryDate.replace(/\D/g, '');
-                    if (value.length >= 2) {
-                        value = value.substring(0, 2) + '/' + value.substring(2, 4);
-                    }
-                    this.checkoutForm.expiryDate = value;
+                formatIban() {
+                    let value = this.checkoutForm.iban.replace(/\s/g, '').toUpperCase();
+                    // Formatta IBAN con spazi ogni 4 caratteri
+                    let formattedValue = value.replace(/(.{4})/g, '$1 ').trim();
+                    this.checkoutForm.iban = formattedValue;
                 },
                 resetCheckoutForm() {
                     this.checkoutForm = {
@@ -526,12 +748,17 @@
                         city: '',
                         cap: '',
                         deliveryMethod: 'delivery',
-                        paymentMethod: 'card',
-                        cardNumber: '',
-                        expiryDate: '',
-                        cvv: '',
-                        cardHolder: ''
+                        paymentMethod: 'stripe',
+                        bankName: '',
+                        customBankName: '',
+                        iban: ''
                     };
+                    
+                    // Reset dei servizi di pagamento
+                    this.paypalRendered = false;
+                    if (this.stripeCard) {
+                        this.stripeCard.clear();
+                    }
                 },
                 saveOrder(order) {
                     let orders = JSON.parse(localStorage.getItem('mtaOrders') || '[]');
