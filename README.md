@@ -1,6 +1,150 @@
-# MTA Social Hub - Setup Pagamenti Reali
+# 🏪 MTA Social Hub - E-commerce Centro Sportivo
 
-## 🚀 PROSSIMI PASSI OBBLIGATORI
+Un sistema e-commerce completo per centri sportivi, sviluppato con Vue.js e sistema di pagamenti integrato.
+
+## 🚀 Avvio Rapido
+
+### Requisiti
+- Browser moderno (Chrome, Firefox, Safari, Edge)
+- Nessun server richiesto - funziona aprendo direttamente il file HTML
+
+### Installazione
+1. Scarica tutti i file del progetto
+2. Apri `index.html` nel browser
+3. Il sistema è pronto all'uso!
+
+## 📁 Struttura del Progetto
+
+```
+MTA SOCIAL HUB/
+├── index.html       # Pagina principale dell'applicazione
+├── style.css        # Stili CSS personalizzati
+├── products.js      # Database prodotti sportivi
+├── config.js        # Configurazione pagamenti
+├── carrello.html    # Pagina carrello (legacy)
+└── README.md        # Questa documentazione
+```
+
+## 🛍️ Gestione Prodotti
+
+### Modifica Prodotti Sportivi
+I prodotti sono definiti nel file `products.js`. Per modificare il catalogo:
+
+1. Apri `products.js`
+2. Modifica l'array `products` con i tuoi articoli
+3. Salva il file
+4. Ricarica la pagina web
+
+### Struttura Prodotto
+```javascript
+{
+    id: 1,                          // ID univoco
+    name: "Nome Prodotto",          // Nome dell'articolo
+    price: 99.99,                   // Prezzo in euro
+    image: "URL_immagine",          // Link immagine prodotto
+    description: "Descrizione..."   // Descrizione dettagliata
+}
+```
+
+### Esempi di Prodotti Inclusi
+- Scarpe da Calcio Nike Mercurial
+- Pallone da Basket Spalding
+- Racchetta da Tennis Wilson
+- Tuta da Allenamento Adidas
+- Borraccia Termica
+- Tappetino Yoga
+- Guanti da Boxe
+- Casco da Ciclismo
+
+## 🛒 Funzionalità E-commerce
+
+### Carrello
+- ➕ Aggiungi prodotti al carrello
+- 🔢 Modifica quantità articoli
+- 🗑️ Rimuovi prodotti
+- 💾 Salvataggio automatico nel browser (localStorage)
+- 💰 Calcolo totale automatico
+
+### Checkout
+- 📝 Form dati cliente completo
+- 🚚 Gestione consegna a domicilio
+- 💳 Multipli metodi di pagamento
+- ✅ Validazione dati in tempo reale
+- 📱 Design responsive per mobile
+
+### Metodi di Pagamento
+- **Stripe** - Carte di credito/debito
+- **PayPal** - Account PayPal e carte tramite PayPal
+- **Bonifico Bancario** - Con generazione IBAN e istruzioni
+
+## 🎨 Personalizzazione
+
+### Modifica Stili
+Edita `style.css` per personalizzare:
+- Colori del brand
+- Font e tipografia
+- Layout e spaziature
+- Effetti e animazioni
+
+### Modifica Logo e Nome
+Nel file `index.html`, cerca:
+```html
+<h1 class="logo">🛍️ MTA Social Hub</h1>
+```
+
+## 📱 Caratteristiche Tecniche
+
+### Tecnologie Utilizzate
+- **Vue.js 3** - Framework JavaScript reattivo
+- **Vanilla CSS** - Stili personalizzati senza framework
+- **Local Storage** - Persistenza dati carrello
+- **Responsive Design** - Ottimizzato per mobile e desktop
+
+### Browser Supportati
+- ✅ Chrome (raccomandato)
+- ✅ Firefox
+- ✅ Safari
+- ✅ Edge
+- ✅ Mobile browsers
+
+### Prestazioni
+- ⚡ Caricamento istantaneo
+- 💾 Nessun database richiesto
+- 🔒 Funziona offline (dopo primo caricamento)
+- 📱 Ottimizzato per mobile
+
+## 🛡️ Sicurezza e Privacy
+
+### Dati Utente
+- I dati del carrello sono salvati solo nel browser dell'utente
+- Nessuna informazione viene inviata a server esterni (tranne pagamenti)
+- I dati di checkout vengono processati solo durante il pagamento
+
+### Pagamenti
+- Integrazione sicura con Stripe (PCI DSS compliant)
+- PayPal con protezione acquirenti
+- Dati carta non salvati localmente
+
+## 🚨 Risoluzione Problemi
+
+### Prodotti Non Caricano
+1. Verifica che `products.js` sia nella stessa cartella di `index.html`
+2. Controlla la console browser (F12) per errori
+3. Assicurati che il file JavaScript non abbia errori di sintassi
+
+### Carrello Non Funziona
+1. Controlla se il browser supporta localStorage
+2. Verifica che JavaScript sia abilitato
+3. Prova in modalità incognito per escludere estensioni
+
+### Pagamenti Non Funzionano
+1. Verifica configurazione in `config.js`
+2. Controlla connessione internet
+3. Vedi sezione configurazione pagamenti sotto
+
+---
+
+## 🔧 CONFIGURAZIONE PAGAMENTI
 
 ### ⚡ FASE 1: CONFIGURAZIONE IMMEDIATA (15 minuti)
 
@@ -97,7 +241,7 @@ paypal: {
 # - GitHub Pages (gratuito con SSL)
 ```
 
-## � CHECKLIST IMMEDIATA
+## ✅ CHECKLIST IMMEDIATA
 
 - [ ] ✅ Account Stripe creato
 - [ ] ✅ Chiave Stripe copiata in `config.js`
@@ -139,30 +283,24 @@ paypal: {
 # - Account verificati
 ```
 
-## 📞 SUPPORTO RAPIDO
+---
 
-**Errori Stripe:** [https://stripe.com/docs](https://stripe.com/docs)
-**Errori PayPal:** [https://developer.paypal.com/docs](https://developer.paypal.com/docs)
+## 📞 Supporto
 
-## 💡 PROSSIMO LIVELLO
+Per problemi tecnici:
+- Controlla la console browser (F12)
+- Verifica configurazione pagamenti
+- Consulta documentazioni ufficiali Stripe/PayPal
 
-Una volta che tutto funziona, potresti aggiungere:
-- 📧 **Email conferma ordini**
-- 📦 **Tracking spedizioni** 
-- 👤 **Account utenti**
-- 📊 **Dashboard admin**
-- 🛒 **Inventory management**
+## 🎯 Prossimi Sviluppi
+
+Possibili miglioramenti futuri:
+- 📧 Sistema email conferma ordini
+- 📦 Tracking spedizioni
+- 👤 Sistema account utenti
+- 📊 Dashboard amministratore
+- 🏪 Gestione inventory
 
 ---
 
-## 🎯 OBIETTIVO: ENTRO OGGI
-
-1. ✅ **15 min:** Setup Stripe + PayPal
-2. ✅ **5 min:** Test pagamenti
-3. ✅ **2 min:** Verifica transazioni
-
-**🎉 RISULTATO: E-commerce funzionante con pagamenti reali!**
-
----
-
-*💬 Hai problemi? Controlla la console del browser (F12) per errori specifici.*
+*💡 **Suggerimento**: Personalizza sempre i prodotti in `products.js` e testa i pagamenti prima di andare in produzione!*

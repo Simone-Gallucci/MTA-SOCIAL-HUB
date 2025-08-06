@@ -1,4 +1,5 @@
-{
+// Prodotti del centro sportivo MTA
+const products = {
   "products": [
     {
       "id": 1,
@@ -57,4 +58,7 @@
       "description": "Casco da ciclismo leggero con ventilazione ottimizzata"
     }
   ]
-}
+};
+
+// Esporta i prodotti per l'uso nell'HTML
+window.PRODUCTS_DATA = products;

@@ -6,6 +6,8 @@
     <title>MTA Social Hub - Marketplace</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <!-- Products Data -->
+    <script src="products.js"></script>
     <!-- Payment Configuration -->
     <script src="config.js"></script>
     <!-- Stripe.js -->
@@ -333,51 +335,14 @@
             },
             methods: {
                 loadProducts() {
-                    // Dati prodotti integrati direttamente nel codice (nessun server necessario)
-                    this.products = [
-                        {
-                            id: 1,
-                            name: "Smartphone Samsung Galaxy",
-                            price: 599.99,
-                            image: "https://via.placeholder.com/200x200/007BFF/FFFFFF?text=Samsung",
-                            description: "Smartphone di ultima generazione con fotocamera avanzata"
-                        },
-                        {
-                            id: 2,
-                            name: "Laptop Dell XPS",
-                            price: 1299.99,
-                            image: "https://via.placeholder.com/200x200/28A745/FFFFFF?text=Dell",
-                            description: "Laptop professionale con processore Intel i7"
-                        },
-                        {
-                            id: 3,
-                            name: "Auricolari Wireless",
-                            price: 79.99,
-                            image: "https://via.placeholder.com/200x200/FFC107/FFFFFF?text=Auricolari",
-                            description: "Auricolari wireless con cancellazione del rumore"
-                        },
-                        {
-                            id: 4,
-                            name: "Tablet iPad Air",
-                            price: 649.99,
-                            image: "https://via.placeholder.com/200x200/DC3545/FFFFFF?text=iPad",
-                            description: "Tablet leggero e potente per lavoro e intrattenimento"
-                        },
-                        {
-                            id: 5,
-                            name: "Smartwatch Apple",
-                            price: 399.99,
-                            image: "https://via.placeholder.com/200x200/6C757D/FFFFFF?text=Watch",
-                            description: "Smartwatch con monitoraggio della salute"
-                        },
-                        {
-                            id: 6,
-                            name: "Speaker Bluetooth",
-                            price: 129.99,
-                            image: "https://via.placeholder.com/200x200/17A2B8/FFFFFF?text=Speaker",
-                            description: "Speaker portatile con audio di alta qualità"
-                        }
-                    ];
+                    // Carica i prodotti dal file products.js (senza server)
+                    if (window.PRODUCTS_DATA && window.PRODUCTS_DATA.products) {
+                        this.products = window.PRODUCTS_DATA.products;
+                    } else {
+                        console.error('Dati prodotti non trovati');
+                        this.showNotification('Errore nel caricamento dei prodotti', 'error');
+                        this.products = []; // Array vuoto come fallback
+                    }
                 },
                 showProducts() {
                     this.currentPage = 'products';
